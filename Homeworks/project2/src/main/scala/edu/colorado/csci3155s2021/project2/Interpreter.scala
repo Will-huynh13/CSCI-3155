@@ -60,15 +60,57 @@ object Interpreter {
 
     def evalExpr(e: Expr, env: Environment): Value = e match {
         case Const(d) => NumValue(d)
+
         case Ident(s) => env.lookup(s)
-        case Line(l) => ??? //TODO: Handle a line object. Note that l is an expression it needs to be evaluated first.
-        case EquiTriangle(sideLength) => ??? //TODO: Handle a triangle object.Note that sideLength is an expression it needs to be evaluated first.
-        case Rectangle(sideLength) => ??? //TODO: Handle a rectangle object.Note that sideLength is an expression it needs to be evaluated first.
-        case Circle(rad) => ??? //TODO: Handle a circle object
-        case Plus (e1, e2) => ??? //TODO: Handle Plus
-        case Minus (e1, e2) => ??? //TODO: Handle Minus
-        case Mult(e1, e2) => ??? // TODO: Handle Multiplication
-        case Div(e1, e2) => ??? // TODO: Handle Division
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case Line(l) => mkLine(l,env)
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case EquiTriangle(sideLength) => mkTriangle(sideLength,env)
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case Rectangle(sideLength) => mkRectangle(sideLength,env)
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case Circle(rad) => mkCircle(rad,env)
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case Plus (e1, e2) => {
+            val v1 = evalExpr(e1, env)
+            val v2 = evalExpr(e2, env)
+            (v1, v2) match {
+                case (NumValue(num1), NumValue(num2)) => NumValue(num1 + num2)
+                case (FigValue(f1), FigValue(f2)) => FigValue(f1.overlap(f2))
+                case _ => throw new IllegalArgumentException("Plus: this aint it bro")
+            }
+        }
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case Minus (e1, e2) => {
+            val v1 = evalExpr(e1,env)
+            val v2 = evalExpr(e2,env)
+            (v1,v2) match {
+                case (NumValue(num1), NumValue(num2)) => NumValue(num1 - num2)
+                case _ => throw new IllegalArgumentException("Minus: this aint it bro")
+            }
+        }
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case Mult(e1, e2) => {
+            val v1 = evalExpr(e1,env)
+            val v2 = evalExpr(e2,env)
+            (v1, v2) match {
+                case (NumValue(num1), NumValue(num2)) => NumValue(num1 * num2)
+                case (FigValue(f1), FigValue(f2)) => FigValue(f1.placeRight(f2))
+                case _ => throw new IllegalArgumentException("Mult: this aint it bro")
+            }
+        }
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case Div(e1, e2) => {
+            val v1 = evalExpr(e1,env)
+            val v2 = evalExpr(e2,env)
+            (v1, v2) match {
+                case (NumValue(num1), NumValue(num2)) => NumValue(num1 / num2)
+                case (FigValue(f1), FigValue(f2)) => FigValue(f2.placeTop(f1))
+                case (FigValue(f1), NumValue(f2)) => FigValue(f1.rotate(f2))
+                case _ => throw new IllegalArgumentException("Div: this aint it bro")
+            }
+        }
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
         case Geq(e1, e2) => binaryExprEval(e1, e2, env) (ValueOps.geq)
         case Gt(e1, e2) => binaryExprEval(e1, e2, env) (ValueOps.gt)
         case Eq(e1, e2) => binaryExprEval(e1, e2, env) (ValueOps.equal)
@@ -126,12 +168,29 @@ object Interpreter {
             val env2 = Extend(x, v1, env)
             evalExpr(e2, env2)
         }
-
-        case FunDef(x, e) => ??? //TODO: Handle FunDef -- look at Value.scala
-        case LetRec(f, x, e1, e2) =>  ??? // TODO: Handle recursive functions -- look at Environment.scala
-        case FunCall(fCall, arg) =>  ??? // TODO: Handle function calls
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case FunDef(x, e) => Closure(x,e,env)
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case LetRec(f, x, e1, e2) => {
+            val newEnv = ExtendREC(f,x,e1,env)
+            evalExpr(e2,newEnv)
+        }
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
+        case FunCall(fCall, arg) => { //addapted from da notes
+            val v1 = evalExpr(fCall, env)
+            val v2 = evalExpr(arg, env)
+            v1 match {
+                case Closure(x, closure_ex, closed_env) => {
+                    // First extend closed_env by binding x to v2
+                    val new_env = Extend(x,v2,closed_env)
+                    // Evaluate the body of the closure under the extended environment.
+                    evalExpr(closure_ex, new_env)
+                }
+                case _ => throw new IllegalArgumentException("Function call error: nah broooooo!")
+            }
+        }
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DONE
     }
-
     def evalProgram(p: Program): Value = p match {
         case TopLevel(e) => evalExpr(e, EmptyEnvironment)
     }

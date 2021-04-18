@@ -1,5 +1,6 @@
-[0m[[0m[0mdebug[0m] [0m[0mRunning TaskDef(edu.colorado.csci3155s2021.project2.CanvasTests, org.scalatest.tools.Framework$$anon$1@1bb4da84, false, [SuiteSelector])[0m
-[0m[[0m[0mdebug[0m] [0m[0mRunning TaskDef(edu.colorado.csci3155s2021.project2.InterpreterTests, org.scalatest.tools.Framework$$anon$1@1bb4da84, false, [SuiteSelector])[0m
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(test, None, None)[0m
+[0m[[0m[0mdebug[0m] [0m[0mEvaluating tasks: Test / test[0m
+[0m[[0m[0mdebug[0m] [0m[0mRunning task... Cancel: Signal, check cycles: false, forcegc: true[0m
 [0m[[0m[0minfo[0m] [0m[0m[32mCanvasTests:[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32m- Test Bounding Box with Polygon [0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32m- Test Bounding Box with Circle [0m[0m
@@ -32,6 +33,5 @@
 [0m[[0m[0minfo[0m] [0m[0m[36mSuites: completed 2, aborted 0[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[36mTests: succeeded 25, failed 0, canceled 0, ignored 0, pending 0[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32mAll tests passed.[0m[0m
-[0m[[0m[0mdebug[0m] [0m[0mPassed tests:[0m
-[0m[[0m[0mdebug[0m] [0m[0m	edu.colorado.csci3155s2021.project2.InterpreterTests[0m
-[0m[[0m[0mdebug[0m] [0m[0m	edu.colorado.csci3155s2021.project2.CanvasTests[0m
+[0m[[0m[32msuccess[0m] [0m[0mTotal time: 2 s, completed Apr 6, 2021 11:53:46 PM[0m
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(idea-shell, None, None)[0m
